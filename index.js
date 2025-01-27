@@ -5,15 +5,15 @@ const AssignmentGroup = {
   id: 1,
   name: "Homework",
   course_id: 1,
-  group_weight: 20,
+  group_weight: "20",
   assignments: [
     { id: 1, name: "Assignment 1", due_at: "2025-01-01", points_possible: 100 },
-    { id: 2, name: "Assignment 2", due_at: "2025-02-01", points_possible: 50 }
+    { id: 2, name: "Assignment 2", due_at: "2025-01-26", points_possible: 50 }
   ]
 };
 const LearnerSubmissions = [
   { learner_id: 1, assignment_id: 1, submission: { submitted_at: "2025-01-02", score: 90 } },
-  { learner_id: 1, assignment_id: 2, submission: { submitted_at: "2025-01-31", score: 40 } }
+  { learner_id: 1, assignment_id: 2, submission: { submitted_at: "2025-01-23", score: 40 } }
 ];
   //-------------------------------------------------------------------------------
 //TODO - Step1 -Validation - CourseInfo & Possible points
@@ -21,6 +21,7 @@ const LearnerSubmissions = [
 //    What if points_possible is 0
 
 function validateInput(CourseInfo, AssignmentGroup){
+    validateNotEmpty();
     
     if(AssignmentGroup.course_id != CourseInfo.id)
     {
@@ -33,7 +34,64 @@ function validateInput(CourseInfo, AssignmentGroup){
     })
 };
 
+function validateNotEmpty(){
+    //CourseInfo
+    for(const key in CourseInfo)
+    {
+        if(CourseInfo[key].toString().trim() != "")
+            continue;
+        else
+        {
+            throw new Error(`Invalid Input: Please provide input for the CourseInfo - "${key.toUpperCase()}"`);
+            break;
+        }            
+    }
 
+    //Assignment Group
+    for(const key in AssignmentGroup)
+    {
+        if(key.toLowerCase() === "assignments")
+        {
+            AssignmentGroup.assignments.forEach((assignment) => {
+                if(assignment.id.toString().trim() === ""){
+                    throw new Error(`Invalid Input: Please provide input for the AssignmentGroup - AssignmentId`);
+                }
+
+                if(assignment.name.toString().trim() === ""){
+                    throw new Error(`Invalid Input: Please provide input for the AssignmentGroup - Assignemnt Id "${assignment.id}" - Name`);
+                }
+
+                if(assignment.due_at.toString().trim() === ""){
+                    throw new Error(`Invalid Input: Please provide input for the AssignmentGroup - Assignemnt Id "${assignment.id}" - Due At`);
+                }
+
+                if(assignment.points_possible.toString().trim() === ""){
+                    throw new Error(`Invalid Input: Please provide input for the AssignmentGroup - Assignemnt Id "${assignment.id}" - points_possible`);
+                }
+            })
+        }
+
+        if(AssignmentGroup[key].toString().trim() !== "")
+            continue;
+        else
+        {
+            throw new Error(`Invalid Input: Please provide input for the AssignmentGroup - "${key.toUpperCase()}"`);           
+        }   
+    }
+    //Learner Submission
+    for(let i = 0; i < LearnerSubmissions.length; i++)
+    {
+        if(LearnerSubmissions[i].learner_id.toString().trim() !== "")
+            continue;
+        else
+        {
+            throw new Error(`Invalid Input: Please provide input for the LearnerSubmissions - Learner Id`);           
+        }   
+
+    }
+}
+
+//-------------------------------------------------------------------------------------------
 //ToDo - Fetch valid assignment, assignment due in past
 // If an assignment is not yet due, do not include it in the results or the average. 
 
@@ -53,15 +111,31 @@ function validateAssignment(AssignmentGroup){
     //If assignment due_at are valid dates, then compare if due in the past (< today) and filter only those assignments
     if(flagValidDate)
     {
-        const validAssignment = AssignmentGroup.assignments.filter(assignment => new Date(assignment.due_at) < new Date(currentDate.toDateString())); 
-        //console.log(validAssignment);
+        const validAssignment = AssignmentGroup.assignments.filter(assignment =>new Date(formatAssignmentDueDate(assignment.due_at)) < new Date(currentDate.toDateString()));         
         return validAssignment;
+
+        // new Date('2019-01-30 00:00:00')
+        // Wed Jan 30 2019 00:00:00 GMT-0500 (Eastern Standard Time)
+        // If I removed the +00 part, then Date method would treat the time as the local computer timezone instead of converting to computer timezone from a UTC time.  It will result in previous date --- Wed Jan 29 2019
+        // new Date('2019-01-31').toISOString() = "+2019-01-31T00:00:00.000Z"
+
+        //function to add 00:00:00 to get proper datess
+
+        function formatAssignmentDueDate(AssignmentDate)
+        {
+            const due_at = new Date(AssignmentDate);
+            const formattedDate = new Date(due_at.toISOString().replace('.000Z', ''));
+            return formattedDate;
+        }
     }
 }
+
+//-----------------------------------------------------------------------------
 //To validate date
 function isInvalidDate(date) {        
     return isNaN(Date.parse(date));
   }
+//-------------------------------------------------------------------------------
 
   //ToDo - Calculate Assignment Scores & Weighted Data
   //"avg": number,
@@ -79,8 +153,8 @@ function calculateScores_WeightedAvg(LearnerSubmissions, validAssignments)
         {   
             flagValidDate = false;
             throw new Error(`Invalid Input: Assignment submitted date "${submission.submission.submitted_at}" is not valid format for Learner Id - ${submission.learner_id}, Assignment Id - 
-                ${submission.assignment_id}`);            
-        } 
+                ${submission.assignment_id}`);                      
+        }     
     });
     
     if(flagValidDate){
@@ -144,7 +218,7 @@ function calculateScores_WeightedAvg(LearnerSubmissions, validAssignments)
                 let resultScores_Avg = calculateScores_WeightedAvg(
                     submissions.filter(sub => sub.learner_id === submission.learner_id), validAssignments);
                 
-                    learners[submission.learner_id].avg = resultScores_Avg[0];
+                    learners[submission.learner_id].avg = Number(resultScores_Avg[0]).toFixed(2);
                     learners[submission.learner_id].scores = resultScores_Avg[1];               
                     
             } 
@@ -160,8 +234,7 @@ function calculateScores_WeightedAvg(LearnerSubmissions, validAssignments)
     
   }
   
-  const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
-  
+  const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);  
   console.log(result);
 
   //-------------------------------------------------------------------------------
