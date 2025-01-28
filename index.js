@@ -1,26 +1,127 @@
 // Test Data 2
 
-const CourseInfo = { id: 1, name: "Math 101" };
-const AssignmentGroup = {
-  id: 1,
-  name: "Homework",
-  course_id: 1,
-  group_weight: "20",
-  assignments: [
-    { id: 1, name: "Assignment 1", due_at: "2025-01-01", points_possible: 100 },
-    { id: 2, name: "Assignment 2", due_at: "2025-01-26", points_possible: 50 }
-  ]
-};
-const LearnerSubmissions = [
-  { learner_id: 1, assignment_id: 1, submission: { submitted_at: "2025-01-02", score: 90 } },
-  { learner_id: 1, assignment_id: 2, submission: { submitted_at: "2025-01-23", score: 40 } }
-];
+// const CourseInfo = { id: 1, name: "Math 101" };
+// const AssignmentGroup = {
+//   id: 1,
+//   name: "Homework",
+//   course_id: 1,
+//   group_weight: "20",
+//   assignments: [
+//     { id: 1, name: "Assignment 1", due_at: "2025-01-01", points_possible: 100 },
+//     { id: 2, name: "Assignment 2", due_at: "2025-01-26", points_possible: 50 }
+//   ]
+// };
+// const LearnerSubmissions = [
+//   { learner_id: 1, assignment_id: 1, submission: { submitted_at: "2025-01-02", score: 90 } },
+//   { learner_id: 1, assignment_id: 2, submission: { submitted_at: "2025-01-23", score: 40 } }
+// ];
+
+//-------------------------------------------------------------------------------
+//Test Data -1
+// The provided course information.
+const CourseInfo = {
+    id: 451,
+    name: "Introduction to JavaScript"
+  };
+  
+  // The provided assignment group.
+  const AssignmentGroup = {
+    id: 12345,
+    name: "Fundamentals of JavaScript",
+    course_id: 451,
+    group_weight: 25,
+    assignments: [
+      {
+        id: 1,
+        name: "Declare a Variable",
+        due_at: "2023-01-25",
+        points_possible: 50
+      },
+      {
+        id: 2,
+        name: "Write a Function",
+        due_at: "2023-02-27",
+        points_possible: 150
+      },
+      {
+        id: 3,
+        name: "Code the World",
+        due_at: "3156-11-15",
+        points_possible: 500
+      }
+    ]
+  };
+  
+  // The provided learner submission data.
+  const LearnerSubmissions = [
+    {
+      learner_id: 125,
+      assignment_id: 1,
+      submission: {
+        submitted_at: "2023-01-25",
+        score: 47
+      }
+    },
+    {
+      learner_id: 125,
+      assignment_id: 2,
+      submission: {
+        submitted_at: "2023-02-12",
+        score: 150
+      }
+    },
+    {
+      learner_id: 125,
+      assignment_id: 3,
+      submission: {
+        submitted_at: "2023-01-25",
+        score: 400
+      }
+    },
+    {
+      learner_id: 132,
+      assignment_id: 1,
+      submission: {
+        submitted_at: "2023-01-24",
+        score: 39
+      }
+    },
+    {
+      learner_id: 132,
+      assignment_id: 2,
+      submission: {
+        submitted_at: "2023-03-07",
+        score: 140
+      }
+    }
+  ];
+
+
+//   const result = [
+//     {
+//       id: 125,
+//       avg: 0.985, // (47 + 150) / (50 + 150)
+//       1: 0.94, // 47 / 50
+//       2: 1.0 // 150 / 150
+//     },
+//     {
+//       id: 132,
+//       avg: 0.82, // (39 + 125) / (50 + 150)
+//       1: 0.78, // 39 / 50
+//       2: 0.833 // late: (140 - 15) / 150
+//     }
+//   ];
+
+//   return result;
+//---------------------------------------------------------------------------
+
   //-------------------------------------------------------------------------------
 //TODO - Step1 -Validation - CourseInfo & Possible points
 //   If an AssignmentGroup does not belong to its course (mismatching course_id), your program should throw an error, letting the user know that the input was invalid. Similar data validation should occur elsewhere within the program.
 //    What if points_possible is 0
 
 function validateInput(CourseInfo, AssignmentGroup){
+    //Validating for empty string
     validateNotEmpty();
     
     if(AssignmentGroup.course_id != CourseInfo.id)
@@ -33,6 +134,7 @@ function validateInput(CourseInfo, AssignmentGroup){
         }
     })
 };
+//--------------------------------------------------------------------------------------
 
 function validateNotEmpty(){
     //CourseInfo
@@ -70,7 +172,7 @@ function validateNotEmpty(){
                 }
             })
         }
-
+        //check for id, name, course_id, group_weight
         if(AssignmentGroup[key].toString().trim() !== "")
             continue;
         else
@@ -81,13 +183,32 @@ function validateNotEmpty(){
     //Learner Submission
     for(let i = 0; i < LearnerSubmissions.length; i++)
     {
-        if(LearnerSubmissions[i].learner_id.toString().trim() !== "")
-            continue;
-        else
+        if(LearnerSubmissions[i].learner_id.toString().trim() === "")
         {
-            throw new Error(`Invalid Input: Please provide input for the LearnerSubmissions - Learner Id`);           
+            throw new Error(`Invalid Input: Please provide input for the LearnerSubmissions - Learner Id`);                    
+        } 
+
+        if(LearnerSubmissions[i].assignment_id.toString().trim() === "")          
+        {
+            throw new Error(`Invalid Input: Please provide input for the LearnerSubmissions - Learner Id ${LearnerSubmissions[i].learner_id} - Assignment Id`);           
         }   
 
+        //submitted date and score can be empty 
+        //just checking score is a number
+        for(const obj of Object.keys(LearnerSubmissions[i])){
+            if(obj.toLowerCase() === "submission")
+            {
+                if(LearnerSubmissions[i].submission.score !== "" && !Number(LearnerSubmissions[i].submission.score))
+                {
+                    throw new Error(`Invalid Input: Please provide valid input for the LearnerSubmission scores for Learner Id - ${LearnerSubmissions[i].learner_id} `);
+                }
+
+                if(LearnerSubmissions[i].submission.score !== "" && LearnerSubmissions[i].submission.submitted_at.trim() === "")
+                {
+                        throw new Error(`Invalid Input: Please provide valid input for the LearnerSubmission submitted date for Learner Id - ${LearnerSubmissions[i].learner_id} `);
+                }
+            }
+        }
     }
 }
 
@@ -99,7 +220,7 @@ function validateAssignment(AssignmentGroup){
     const currentDate = new Date(); 
     let flagValidDate = true; 
 
-    //To validate assignment Due Date is in valid format
+    //To validate assignment Due Date is in date format
     AssignmentGroup.assignments.forEach(assignment => {
         if(isInvalidDate(new Date(assignment.due_at)))
         {   
@@ -146,10 +267,12 @@ function calculateScores_WeightedAvg(LearnerSubmissions, validAssignments)
 {
     let flagValidDate = true; 
     let result = [];
+    
 
     //To validate assignment submitted date is in valid format
-    LearnerSubmissions.forEach(submission => {    
-        if(isInvalidDate(new Date(submission.submission.submitted_at)))
+    LearnerSubmissions.forEach(submission => {   
+       
+        if(submission.submission.submitted_at.trim()!="" && isInvalidDate(new Date(submission.submission.submitted_at)))
         {   
             flagValidDate = false;
             throw new Error(`Invalid Input: Assignment submitted date "${submission.submission.submitted_at}" is not valid format for Learner Id - ${submission.learner_id}, Assignment Id - 
@@ -177,7 +300,7 @@ function calculateScores_WeightedAvg(LearnerSubmissions, validAssignments)
                         {
                             score -= score * 10/100;
                         }
-                        scores[submission.assignment_id] = (score / assignment.points_possible) * 100;                        
+                        scores[submission.assignment_id] = Number((score / assignment.points_possible) * 100).toFixed(2);                        
                         totalScore += score;
                         totalPossiblePoints += assignment.points_possible;
                 }
@@ -233,105 +356,10 @@ function calculateScores_WeightedAvg(LearnerSubmissions, validAssignments)
     }   
     
   }
+
   
   const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);  
+  console.log("Result:");
   console.log(result);
 
-  //-------------------------------------------------------------------------------
-//Test Data -1
-// The provided course information.
-// const CourseInfo = {
-//     id: 451,
-//     name: "Introduction to JavaScript"
-//   };
   
-//   // The provided assignment group.
-//   const AssignmentGroup = {
-//     id: 12345,
-//     name: "Fundamentals of JavaScript",
-//     course_id: 451,
-//     group_weight: 25,
-//     assignments: [
-//       {
-//         id: 1,
-//         name: "Declare a Variable",
-//         due_at: "2023-01-25",
-//         points_possible: 50
-//       },
-//       {
-//         id: 2,
-//         name: "Write a Function",
-//         due_at: "2023-02-27",
-//         points_possible: 150
-//       },
-//       {
-//         id: 3,
-//         name: "Code the World",
-//         due_at: "3156-11-15",
-//         points_possible: 500
-//       }
-//     ]
-//   };
-  
-//   // The provided learner submission data.
-//   const LearnerSubmissions = [
-//     {
-//       learner_id: 125,
-//       assignment_id: 1,
-//       submission: {
-//         submitted_at: "2023-01-25",
-//         score: 47
-//       }
-//     },
-//     {
-//       learner_id: 125,
-//       assignment_id: 2,
-//       submission: {
-//         submitted_at: "2023-02-12",
-//         score: 150
-//       }
-//     },
-//     {
-//       learner_id: 125,
-//       assignment_id: 3,
-//       submission: {
-//         submitted_at: "2023-01-25",
-//         score: 400
-//       }
-//     },
-//     {
-//       learner_id: 132,
-//       assignment_id: 1,
-//       submission: {
-//         submitted_at: "2023-01-24",
-//         score: 39
-//       }
-//     },
-//     {
-//       learner_id: 132,
-//       assignment_id: 2,
-//       submission: {
-//         submitted_at: "2023-03-07",
-//         score: 140
-//       }
-//     }
-//   ];
-
-
-//   const result = [
-//     {
-//       id: 125,
-//       avg: 0.985, // (47 + 150) / (50 + 150)
-//       1: 0.94, // 47 / 50
-//       2: 1.0 // 150 / 150
-//     },
-//     {
-//       id: 132,
-//       avg: 0.82, // (39 + 125) / (50 + 150)
-//       1: 0.78, // 39 / 50
-//       2: 0.833 // late: (140 - 15) / 150
-//     }
-//   ];
-
-//   return result;
-//---------------------------------------------------------------------------
